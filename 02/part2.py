@@ -23,10 +23,10 @@ for line in input_lines:
       if( report[c-1] - report[c] not in range(1,4) ):
         is_safe = False
         break
-  # Still safe, let's increase the counter
+  # Still safe, let's increase the counter. Until here it's identical from part 1.
   if is_safe:
     count_safe += 1
-  # Now let's try to remove one entry and recheck the safety
+  # Now, in part 2, let's try to remove one entry and recheck the safety
   else:
     for i in range(len(report)):
       report2 = report[:i] + report[i+1 :]
@@ -50,4 +50,5 @@ for line in input_lines:
       if is_safe:
         count_safe += 1
         break
+      
 print(f"Answer: {count_safe}")
