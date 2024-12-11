@@ -21,7 +21,7 @@ for i in range(0,len(input_line)):
   elif block_size > 0:
     input_data.append([-1, block_size])
   
-print(input_data)
+# print(input_data)
 
 while last_file >= 0:
   to_insert = None
@@ -56,7 +56,7 @@ while last_file >= 0:
     input_data = new_input_data
   last_file -= 1
     
-print(input_data)
+# print(input_data)
 
 checksum = 0
 pos = 0
