@@ -45,12 +45,139 @@ for r in range(area_rows):
 
 # Now we need to calculate the number of sides
 def sides(region):
-  return 1 # TODO
+  UP = 1
+  DOWN = 2
+  LEFT = 4
+  RIGHT = 8
+  # Mapping every coordinate to a set of borders
+  border_map = {}
+  # At first, every coordinate have all borders
+  for r in region:
+    border_map[r] = UP | DOWN | LEFT | RIGHT
+
+  # Now we have to eliminate the borders of adjacent coordinates
+  for i in range(len(region)-1):
+    ri, ci = region[i]
+    for j in range(i+1,len(region)):
+      rj, cj = region[j]
+      # Same row
+      if ri == rj:
+        # One column difference, region i at right of region j
+        if ci - cj == 1:
+          # Remove the border at right of region i
+          border_map[region[i]] &= ~RIGHT
+          # Remove the border at left of region j
+          border_map[region[j]] &= ~LEFT
+        # One column difference, region j at right of region i
+        elif cj - ci == 1:
+          # Remove the border at left of region i
+          border_map[region[i]] &= ~LEFT
+          # Remove the border at right of region j
+          border_map[region[j]] &= ~RIGHT
+          
+      # Same column
+      elif ci == cj:
+        # One row difference, region j below region i
+        if rj - ri == 1:
+          # Remove the border at bottom of region i
+          border_map[region[i]] &= ~DOWN
+          # Remove the border at top of region j
+          border_map[region[j]] &= ~UP
+        # One row difference, region i below region j
+        elif ri - rj == 1:
+          # Remove the border at top of region i
+          border_map[region[i]] &= ~UP
+          # Remove the border at bottom of region j
+          border_map[region[j]] &= ~DOWN
+  
+  count_sides = 0
+  # Finally, we need the borders into sides
+  for block in region:
+    # Get the remaining borders
+    bi = border_map[block]
+    # We need at least 1 border
+    if bi == 0:
+      continue
+
+    ri, ci = block
+    # UP border
+    if bi & UP:
+      # Creating a new side
+      count_sides += 1
+      # And we can remove this border from this block
+      border_map[block] &= ~UP
+      
+      # Checking going left
+      r, c = ri, ci-1
+      # While we are still finding blocks at left and these blocks have the UP border...
+      while (r,c) in region and border_map[(r,c)] & UP:
+        # We group this border into our current side
+        border_map[(r,c)] &= ~UP
+        # Next block at left...
+        c = c-1
+      # Checking going right
+      r, c = ri, ci+1
+      while (r,c) in region and border_map[(r,c)] & UP:
+        border_map[(r,c)] &= ~UP
+        c = c+1
+    # DOWN border
+    if bi & DOWN:
+      # Creating a new side
+      count_sides += 1
+      # And we can remove this border from this block
+      border_map[block] &= ~DOWN
+      
+      # Checking going left
+      r, c = ri, ci-1
+      while (r,c) in region and border_map[(r,c)] & DOWN:
+        border_map[(r,c)] &= ~DOWN
+        c = c-1
+      # Checking going right
+      r, c = ri, ci+1
+      while (r,c) in region and border_map[(r,c)] & DOWN:
+        border_map[(r,c)] &= ~DOWN
+        c = c+1
+    # LEFT border
+    if bi & LEFT:
+      # Creating a new side
+      count_sides += 1
+      # And we can remove this border from this block
+      border_map[block] &= ~LEFT
+      
+      # Checking going up
+      r, c = ri-1, ci
+      while (r,c) in region and border_map[(r,c)] & LEFT:
+        border_map[(r,c)] &= ~LEFT
+        r=r-1
+      # Checking going down
+      r, c = ri+1, ci
+      while (r,c) in region and border_map[(r,c)] & LEFT:
+        border_map[(r,c)] &= ~LEFT
+        r=r+1
+    # RIGHT border
+    if bi & RIGHT:
+      # Creating a new side
+      count_sides += 1
+      # And we can remove this border from this block
+      border_map[block] &= ~RIGHT
+      
+      # Checking going up
+      r, c = ri-1, ci
+      while (r,c) in region and border_map[(r,c)] & RIGHT:
+        border_map[(r,c)] &= ~RIGHT
+        r=r-1
+      # Checking going down
+      r, c = ri+1, ci
+      while (r,c) in region and border_map[(r,c)] & RIGHT:
+        border_map[(r,c)] &= ~RIGHT
+        r=r+1
+  return count_sides
+
 
 price = 0
 for region in region_list:
-  # first = region[0]
-  # print(f"{input_lines[first[0]][first[1]]}: {region} {len(region)} {perimeter(region)}")
+  first = region[0]
+  print(f"{input_lines[first[0]][first[1]]}: {region} {len(region)} {sides(region)}")
   price += len(region) * sides(region)
     
 print(f"Answer: {price}")
