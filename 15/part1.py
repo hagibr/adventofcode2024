@@ -20,7 +20,7 @@ for line in input_lines:
   elif '^' in line or 'v' in line or '<' in line or '>' in line:
     moves += ([a for a in line.replace('\n', '')])
   row += 1
-# print( warehouse )
+# for w in warehouse: print(''.join(w)) # Just checking
 # print( moves )
 # print( robot_row, robot_col )
 
