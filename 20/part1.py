@@ -1,5 +1,5 @@
-# input_file = open("20/example.txt"); min_cheat = 2
-input_file = open("20/input.txt"); min_cheat = 100
+# input_file = open("20/example.txt"); min_cheat = 2 # 44 
+input_file = open("20/input.txt"); min_cheat = 100 # 1411 with my input
 input_lines = input_file.readlines()
 input_file.close()
 
@@ -44,66 +44,24 @@ while(pos != end):
   p += 1
 
 cheat_count = dict()
-# Now it's time to count the number of cheats that can save at least 100 picoseconds
-for r, line in enumerate(grid):
-  for c, val in enumerate(line):
-    # Checking every wall
-    if val == '#':
-      # Calculing the sides
-      north = (r-1,c)
-      south = (r+1,c)
-      east = (r,c+1)
-      west = (r,c-1)
-      # Now we test if there are 2 sides with differences of points of at least 102
-      # This is because when we cheat, we consume 2 points, so the total saved will
-      # be at least 100 points 
-      if( north in points ):
-        points_north = points[north]
-        if( south in points ):
-          diff_points = abs(points_north - points[south]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
-        if( east in points ):
-          diff_points = abs(points_north - points[east]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
-        if( west in points ):
-          diff_points = abs(points_north - points[west]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
-      if( south in points ):
-        points_south = points[south]
-        if( east in points ):
-          diff_points = abs(points_south - points[east]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
-        if( west in points ):
-          diff_points = abs(points_south - points[west]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
-      if( east in points ):
-        if( west in points ):
-          diff_points = abs(points[east] - points[west]) - 2
-          if( diff_points >= min_cheat ):
-            if diff_points in cheat_count:
-              cheat_count[diff_points] += 1
-            else:
-              cheat_count[diff_points] = 1
+# These are the offsets that if applied to current position, spend exactly 2 picoseconds
+# It's basically the list of points with manhattan distance equal to 2
+search_off = [(-2,0), (2,0), (0,2), (0,-2), (-1,-1), (-1,1), (1,-1), (1,1)]
+# Now it's time to count the number of cheats that can save at least (min_cheat) picoseconds
+for p in points:
+  current_points = points[p]
+  r,c = p
+  # Checks at most 
+  for off in search_off:
+    p_off = (r+off[0], c+off[1])
+    if p_off in points:
+      off_points = points[p_off]
+      diff = off_points - current_points - 2
+      if diff >= min_cheat:
+        if diff in cheat_count:
+          cheat_count[diff] += 1
+        else:
+          cheat_count[diff] = 1
 
 for c in sorted(cheat_count): print(f"There is/are {cheat_count[c]} cheat(s) that saves {c} picoseconds.")
 
