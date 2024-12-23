@@ -1,85 +1,75 @@
-input_file = open("22/example2.txt") 
-# input_file = open("22/input.txt")
+# input_file = open("22/example2.txt") 
+input_file = open("22/input.txt")
 input_lines = input_file.readlines()
 input_file.close()
 
 secret_list = [int(v) for v in input_lines]
 
-unique_list = set()
-for i in secret_list:
-  unique_list.add(i%0xFFFFFF)
-
-
 # Optimized next secret calculation
 def next(x):
-  old_x = x
   x = (x ^ (x << 6)) & (0xFFFFFF)
   x = (x ^ (x >> 5)) & (0xFFFFFF)
   x = (x ^ (x << 11)) & (0xFFFFFF)
   return x
 
-def banana2000(x,changes):
-  index = 0
-  unit_x = x%10
-  for i in range(2000):
-    x = next(x)
-    unit_x2 = x%10
-    if( (unit_x2 - unit_x) == changes[index] ):
-      index += 1
-      if index == len(changes):
-        return unit_x2 
-    else:
-      index = 0
-    unit_x = unit_x2
-  return 0
+# This function generate a dictionary where the key is the tuple of the 4 last changes and
+# the value is the first price found with that changes.
+# This is going to create a cache of all possibilities for the 2000 first secret numbers
+def gen_seqs(start):
+  x = start
+  price_x1 = x%10
+  x = next(x)
+  price_x2 = x%10
+  x = next(x)
+  price_x3 = x%10
+  x = next(x)
+  price_x4 = x%10
+  x = next(x)
+  price_x5 = x%10
+  seq = dict()
+  d1,d2,d3,d4 = price_x2 - price_x1, price_x3 - price_x2, price_x4 - price_x3, price_x5 - price_x4
 
-# Return all lists of sequences of differences
-def seq_price(x,price):
-  unit_x = x%10
-  x = next(x)
-  unit_x2 = x%10
-  x = next(x)
-  unit_x3 = x%10
-  x = next(x)
-  unit_x4 = x%10
-  d1,d2,d3 = unit_x2 - unit_x, unit_x3 - unit_x2, unit_x4 - unit_x3
-  seq = list()
-  
-  for i in range(2000-3):
+  for _ in range(2000-4):
+    if((d1,d2,d3,d4) not in seq):
+      seq[(d1,d2,d3,d4)] = price_x5
     x = next(x)
-    unit_xn = x%10
-    d4 = unit_xn - unit_x4
-    if unit_xn == price:
-      seq.append((d1,d2,d3,d4))
-    unit_x4 = unit_xn
+    price_xn = x%10
     d1 = d2
     d2 = d3
     d3 = d4
+    d4 = price_xn - price_x5
+    price_x5 = price_xn
+    
   return seq
 
-# print(1, banana2000(1,[-2,1,-1,3]))
-# print(2, banana2000(2,[-2,1,-1,3]))
-# print(3, banana2000(3,[-2,1,-1,3]))
-# print(2024, banana2000(2024,[-2,1,-1,3]))
+# This will store all the "last 4" changes from all the values from input
+all_changes = set()
+# This will map the current input value with it's cached values
+secret_seq = dict()
+for i in secret_list:
+  seq = gen_seqs(i)
+  # print(i, len(seq))
+  secret_seq[i] = seq
+  all_changes = all_changes.union(set(seq))
+  
+print("all", len(all_changes))
 
-# First we create a set of tuples containing all sequences that give price 9
-candidates = set()
-for s in secret_list:
-  candidates = candidates.union(set(seq_price(s,9)))
-print(len(candidates))
+# print(1, dict_seq[1].get((-2,1,-1,3),0))
+# print(2, dict_seq[2].get((-2,1,-1,3),0))
+# print(3, dict_seq[3].get((-2,1,-1,3),0))
+# print(2024, dict_seq[2024].get((-2,1,-1,3),0))
 
 max = 0
-max2 = 0
-# Now we test the best sum of all
-count_tests = 0
-candidates = list(candidates)
-for i in range(len(candidates)):
+# Now we test the best sum of all changes
+i = 0
+for chg in all_changes:
   sum = 0
-  c = candidates[i]
   for s in secret_list:
-    sum += banana2000(s, c)
+    dict_s = secret_seq[s]
+    # If we don't find this change on this dictionary, returns 0
+    sum += dict_s.get(chg, 0)
   if sum >= max:
     max = sum
-    c_max = c
-    print(max, c, c_max, i)
+    print(max, chg, i)
+  i += 1
 print(f"Answer: {max}")
