@@ -55,4 +55,5 @@ for cardinality in range(3,max_conn+1):
   if len(next_tuples) > 0:
     curr_tuples = next_tuples
 
-print(curr_tuples)
+
+print(','.join(curr_tuples[0]))
