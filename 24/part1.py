@@ -1,6 +1,6 @@
 # input_file = open("24/example.txt")
-input_file = open("24/example2.txt") 
-# input_file = open("24/input.txt")
+# input_file = open("24/example2.txt") 
+input_file = open("24/input.txt")
 input_lines = input_file.readlines()
 input_file.close()
 
